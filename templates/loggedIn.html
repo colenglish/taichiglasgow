@@ -1,0 +1,12 @@
+<% if (model.get('loggedIn')) { %>
+    <form id="logout_form" class="navbar-form pull-right">
+        <label>Signed in as <strong><%= model.get('userName') %></strong></label>
+        <button type="submit" class="btn btn-inverse">Sign out</button>
+    </form>
+<% } else { %>
+    <form id="login_form" class="navbar-form pull-right">
+        <input name="username" type="text" class="input-small" placeholder="Username">
+        <input name="password" type="password" class="input-small" placeholder="Password">
+        <button type="submit" class="btn btn-inverse">Sign in</button>
+    </form>
+<% } %>
