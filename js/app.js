@@ -5,8 +5,9 @@ define([
   'Backbone',
   'router',
   'models/clientSession',
-  'views/loggedIn'
-], function($, _, Backbone, Router, ClientSession, LoggedInView){
+  'views/loggedIn',
+  'views/siteMenu'
+], function($, _, Backbone, Router, ClientSession, LoggedInView, SiteMenuView){
     var AppView = Backbone.View.extend({
 
         initialize: function () {
@@ -14,6 +15,8 @@ define([
             Router.initialize({ clientSession: this.model });
             this.loggedInPanel = new LoggedInView({ clientSession: this.model });
             this.loggedInPanel.render();
+            this.siteMenu = new SiteMenuView({ clientSession: this.model });
+            this.siteMenu.render();
         },
 
         render: function () {

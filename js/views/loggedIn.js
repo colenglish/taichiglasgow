@@ -1,12 +1,10 @@
-// Filename: app.js
 define([
     'jQuery',
     'Underscore',
     'Backbone',
-    'router',
     'models/clientSession',
     'text!templates/loggedIn.html'
-], function($, _, Backbone, Router, ClientSession, LoggedInTemplate){
+], function($, _, Backbone, ClientSession, LoggedInTemplate){
     var LoggedInView = Backbone.View.extend({
 
         el: '#loggedInPanel',

@@ -78,52 +78,6 @@ app.get('/api/classes/:id', function (req, res){
     });
 });
 
-app.get('/api/injecttestdata', function (req, res){
-    ClassModel.remove();
-    var class1 = new ClassModel({
-        location: "St. Ninian's Church, Albert Drive, Pollokshields",
-        day: "Tuesday",
-        starttime: "7:30pm",
-        endtime: "10:00pm",
-        notes: "This is a general class, open to beginners and advanced students alike."
-    });
-    class1.save(function (err) {
-        if (!err) {
-            return console.log("created");
-        } else {
-            return console.log(err);
-        }
-    });
-    class1 = new ClassModel({
-        location: "St. Ninian's Church, Albert Drive, Pollokshields",
-        day: "Thursday",
-        starttime: "7:30pm",
-        endtime: "10:00pm",
-        notes: "This is a general class, open to beginners and advanced students alike."
-    });
-    class1.save(function (err) {
-        if (!err) {
-            return console.log("created");
-        } else {
-            return console.log(err);
-        }
-    });
-	
-	UserModel.remove();
-	var user = new UserModel({
-        username: "colin",
-        password: "test",
-        role: "admin"
-    });
-    user.save(function (err) {
-        if (!err) {
-            return console.log("created");
-        } else {
-            return console.log(err);
-        }
-    });
-});
-
 app.get('/api/users', validateAdminUser, function (req, res){
     return UserModel.find(function (err, users) {
         if (!err) {

@@ -11,7 +11,7 @@ define([
         },
 
         initialize: function() {
-            if (window.sessionStorage){
+            if (window.sessionStorage && window.sessionStorage['loggedIn']){
                 this.set({
                     loggedIn: JSON.parse(window.sessionStorage['loggedIn']), // ensure we get the bool out if it's there, not a string
                     userName: window.sessionStorage['userName'],
