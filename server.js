@@ -6,29 +6,25 @@ var _ = require('underscore');
 var app = express();
 
 // Database
-var db;
+var db = mongoose.connect(process.env.MONGO_URI);
 
 // Config
-app.configure(function () {
-    app.use(express.bodyParser());
-    app.use(express.cookieParser());
-    app.use(express.session({
-        store: mongoStore(db),
-        secret: 'my test app secret'
-    }));
-    app.use(express.methodOverride());
-    app.use(app.router);
-    app.use(express.static(__dirname));
-});
+app.use(express.bodyParser());
+app.use(express.cookieParser());
+app.use(express.session({
+    store: mongoStore(db),
+    secret: process.env.MONGO_SESSION_SECRET
+}));
+app.use(express.methodOverride());
+app.use(app.router);
+app.use(express.static(__dirname));
 
+// Conditional config based on value of process.env.NODE_ENV
 app.configure('development', function(){
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-    db = mongoose.connect('mongodb://localhost/taichi_database');
 });
-
 app.configure('production', function(){
     app.use(express.errorHandler());
-    db = mongoose.connect('mongodb://localhost/taichi_database');
 });
 
 var ClassModel = require('./servermodels.js').ClassModel(db);
@@ -133,7 +129,7 @@ app.post('/api/logout', function(req, res) {
 });
 
 // Launch server
-var port = process.env.PORT || 5000;
+var port = process.env.PORT; // Set in env vars via IDE config (debug), local .env (foreman), or heroku config (production)
 app.listen(port, function() {
     console.log("Listening on " + port);
 });
