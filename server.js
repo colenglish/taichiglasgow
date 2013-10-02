@@ -1,58 +1,99 @@
+var _ = require('underscore');
 var express = require("express");
 var mongoose = require('mongoose');
 var mongoStore = require('connect-mongodb');
-var _ = require('underscore');
+var passport = require('passport');
+var FacebookStrategy = require('passport-facebook').Strategy;
+var LocalStrategy = require('passport-local').Strategy
 
 var app = express();
 
 // Database
 var db = mongoose.connect(process.env.MONGO_URI);
 
+var models = require('./servermodels.js');
+var ClassModel = models.ClassModel(db);
+var UserModel = models.UserModel(db);
+
 // Config
-app.use(express.bodyParser());
-app.use(express.cookieParser());
-app.use(express.session({
-    store: mongoStore(db),
-    secret: process.env.MONGO_SESSION_SECRET
-}));
-app.use(express.methodOverride());
-app.use(app.router);
 app.use(express.static(__dirname));
+app.use(express.cookieParser());
+app.use(express.bodyParser());
+app.use(express.session({ store: mongoStore(db), secret: process.env.MONGO_SESSION_SECRET }));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(app.router);
 
 // Conditional config based on value of process.env.NODE_ENV
 app.configure('development', function(){
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+    passport.use(new LocalStrategy(
+        function(username, password, done) {
+            UserModel.findOne({ username: username }, function(err, user) {
+                if (err) { return done(err); }
+                if (!user) {
+                    return done(null, false, { message: 'Incorrect username.' });
+                }
+                return done(null, user);
+            });
+        }
+    ));
 });
 app.configure('production', function(){
     app.use(express.errorHandler());
+    passport.use(new FacebookStrategy({
+            clientID: process.env.FACEBOOK_APP_ID,
+            clientSecret: process.env.FACEBOOK_APP_SECRET,
+            callbackURL: process.env.FACEBOOK_CALLBACK_URL
+        },
+        function(accessToken, refreshToken, profile, done) {
+            UserModel.findOrCreate({ username: profile.username }, function(err, user) {
+                if (err) { return done(err); }
+                done(null, user);
+            });
+        }
+    ));
 });
 
-var ClassModel = require('./servermodels.js').ClassModel(db);
-var UserModel = require('./servermodels.js').UserModel(db);
+var authenticateStrategy = process.env.NODE_ENV === 'development' ? 'local' : 'facebook';
 
-function validateUserForRoles(req, res, next, allowedRoles){
-    if (req.session && req.session.user_id) {
-        UserModel.findById(req.session.user_id, function(user) {
-            if (user && _.contains(allowedRoles, user.role)) {
+var authorizeByRoles = function(roles) {
+    return [
+        passport.authenticate(authenticateStrategy),
+        function(req, res, next) {
+            if (req.user && _.contains(roles, req.user.role))
                 next();
-            } else {
-                res.writeHead(401, { 'Content-Type': 'text/html' });
-                res.end();
-            }
-        });
-    } else {
-        res.writeHead(401, { 'Content-Type': 'text/html' });
-        res.end();
-    }
-}
+            else
+                res.send(401, 'Unauthorized');
+        }
+    ];
+};
 
-function validateAnyUser(req, res, next){
-    validateUserForRoles(req, res, next, ['user', 'admin']);
-}
+// Redirect the user to Facebook for authentication.  When complete,
+// Facebook will redirect the user back to the application at
+//     /auth/facebook/callback
+app.get('/auth/facebook', passport.authenticate('facebook'));
 
-function validateAdminUser(req, res, next){
-    validateUserForRoles(req, res, next, ['admin']);
-}
+// Facebook will redirect the user to this URL after approval.  Finish the
+// authentication process by attempting to obtain an access token.  If
+// access was granted, the user will be logged in.  Otherwise,
+// authentication has failed.
+app.get('/auth/facebook/callback',
+    passport.authenticate('facebook',
+    { successRedirect: '/', failureRedirect: '/' }));
+
+app.post('/login',
+    passport.authenticate('local'),
+    function(req, res) {
+        return res.send(req.user._doc);
+    });
+
+//Log out the current user
+app.post('/logout', function(req, res) {
+    req.session.destroy();
+    req.logout();
+    res.redirect('/');
+});
 
 app.get('/api/classes', function (req, res){
     return ClassModel.find(function (err, classes) {
@@ -74,7 +115,7 @@ app.get('/api/classes/:id', function (req, res){
     });
 });
 
-app.get('/api/users', validateAdminUser, function (req, res){
+app.get('/api/users', authorizeByRoles(['admin']), function (req, res){
     return UserModel.find(function (err, users) {
         if (!err) {
             return res.send(users);
@@ -84,7 +125,7 @@ app.get('/api/users', validateAdminUser, function (req, res){
     });
 });
 
-app.post('/api/users', validateAdminUser, function(req, res) {
+app.post('/api/users', authorizeByRoles(['admin']), function(req, res) {
     var user = new UserModel({
         username: req.body.username,
         password: req.body.password
@@ -98,34 +139,6 @@ app.post('/api/users', validateAdminUser, function(req, res) {
             return res.send(err);
         }
     })
-});
-
-//Log in an existing user, starting a session
-app.post('/api/login', function(req, res) {
-    return UserModel.findOne({ username : req.body.username }, function (err, user) {
-        if (!err) {
-            if (user && user.authenticate(req.body.password)){
-                req.session.user_id = user._doc._id;
-                req.session.user_role = user._doc.role;
-                return res.send(user._doc);
-            } else {
-                req.session.destroy();
-                res.writeHead(401, { 'Content-Type': 'text/html' });
-                res.end();
-            }
-        } else {
-            return res.send(err);
-        }
-    });
-});
-
-//Log out the current user
-app.post('/api/logout', function(req, res) {
-
-    req.session.destroy();
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.end();
-
 });
 
 // Launch server

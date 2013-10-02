@@ -29,7 +29,7 @@ define([
                 password = $form.find( 'input[name="password"]' ).val();
 
             $.post(
-                "\\api\\login",
+                "\\login",
                 { username: username, password: password },
                 function( data ) {
                     that.model.set({ userName: data.username, userRole: data.role, loggedIn: true});
@@ -42,7 +42,7 @@ define([
 
             var that = this;
 
-            $.post( "\\api\\logout", {},
+            $.post( "\\logout", {},
                 function( data ) {
                     that.model.set({ userName: null, userRole: null, loggedIn: false});
                 }
@@ -51,6 +51,7 @@ define([
 
         render: function () {
             this.$el.html(_.template(LoggedInTemplate, { model: this.model}));
+            return this;
         }
     });
 

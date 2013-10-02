@@ -21,7 +21,7 @@ require.config({
 require([
     'order!libs/jquery/jquery-1.7.1.min',
     'order!libs/underscore/underscore-min',
-    'order!libs/bootstrap/bootstrap-min',
+    'order!libs/bootstrap/bootstrap.min',
     'order!libs/backbone/backbone-min',
     'order!app'
 ], function($, _, Bootstrap, Backbone, App){

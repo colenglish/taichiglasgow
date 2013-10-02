@@ -1,1 +1,36 @@
-TBD.
+<div class="panel-group" id="yin-nei-gung">
+    <% var id = _.uniqueId();
+    _.each(yinSet, function(exercise){ %>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#yin-nei-gung" href="#yin-<%= id %>">
+                    <%= exercise.name %>
+                </a>
+            </h4>
+        </div>
+        <div id="yin-<%= id %>" class="panel-collapse collapse">
+            <div class="panel-body"><%= exercise.description %></div>
+        </div>
+    </div>
+    <% id = _.uniqueId();
+    }); %>
+</div>
+<div class="panel-group" id="yang-nei-gung">
+    <% var id = _.uniqueId();
+    _.each(yangSet, function(exercise){ %>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#yang-nei-gung" href="#yang-<%= id %>">
+                    <%= exercise.name %>
+                </a>
+            </h4>
+        </div>
+        <div id="yang-<%= id %>" class="panel-collapse collapse">
+            <div class="panel-body"><%= exercise.description %></div>
+        </div>
+    </div>
+    <% id = _.uniqueId();
+    }); %>
+</div>

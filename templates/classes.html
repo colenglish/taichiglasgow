@@ -1,9 +1,9 @@
 <% _.each(classes, function(c){ %>
-	<form>
-		<legend><%= c.get("location") %></legend>
-		<label>Teacher: <%= c.get("teacher") %></label>
-		<label>When: <%= c.get("day") %>, <%= c.get("starttime") %> - <%= c.get("endtime") %></label>
-		<label>Cost: &#xa3;<%= c.get("cost") %></label>
-		<p><%= c.get("notes") %></p>
-	</form> 
+<form>
+    <legend><%= c.get("location") %></legend>
+    <label>Teacher: <%= c.get("teacher") %></label>
+    <label>When: <%= c.get("day") %>, <%= c.get("starttime") %> - <%= c.get("endtime") %></label>
+    <label>Cost: &#xa3;<%= c.get("cost") %></label>
+    <p><%= c.get("notes") %></p>
+</form>
 <% }); %>

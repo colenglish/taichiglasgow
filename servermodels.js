@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var crypto = require('crypto');
+var findOrCreate = require('mongoose-findorcreate');
 
 var Schema = mongoose.Schema;
 
@@ -22,42 +22,14 @@ exports.ClassModel = function(db) {
 
 // Create a schema for our users
 var UserSchema = new Schema({
-    username: { type: String, validate: [usernameValidator, 'Invalid username'] },
-    password_hash: { type: String },
-    salt: { type: String },
+    username: { type: String },
     role: { type: String, enum: ['user', 'admin'], default: "user" }
 });
 
-function usernameValidator () {
-    // TODO: Better username validation, and validate
-    return this.username && this.username.length > 0 && this.username.length < 255;
-}
+UserSchema.plugin(findOrCreate);
 
 // Ascending index on username, ensuring uniqueness
 UserSchema.index({username: 1}, {unique: true});
-
-//Instance methods
-UserSchema.methods.makeSalt = function(){
-    return Math.round((new Date().valueOf() * Math.random())) + '';
-}
-
-UserSchema.methods.encryptPassword = function(password){
-	return crypto.createHmac('sha1', this.salt).update(password).digest('hex');
-}
-
-UserSchema.methods.authenticate = function(plainText){
-    return this.encryptPassword(plainText) === this.password_hash;
-}
-
-// Getters and Setters
-UserSchema.virtual("idString").get(function () {
-    return this._id.toHexString();
-});
-
-UserSchema.virtual("password").set(function (password) {
-    this.salt = this.makeSalt();
-    this.password_hash = this.encryptPassword(password);
-});
 
 mongoose.model('User', UserSchema);
 exports.UserModel = function(db) {

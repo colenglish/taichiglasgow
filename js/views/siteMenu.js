@@ -23,9 +23,9 @@ define([
         },
 
         render: function () {
-
             var menuitems = this.session.get('loggedIn') ? this.membermenuitems : this.standardmenuitems;
             this.$el.html(_.template(SiteMenuTemplate, { items: menuitems }));
+            return this;
         }
     });
 
