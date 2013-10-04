@@ -11,10 +11,8 @@
         "express": "3.x",
         "mongoose": "2.6.x",
         "connect-mongodb": "*",
-        "mongoose-findorcreate": "*",
         "underscore": "*",
         "passport": "*",
-        "passport-facebook": "*",
-        "passport-local": "*"
+        "passport-facebook": "*"
     }
 }

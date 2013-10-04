@@ -4,7 +4,6 @@ var mongoose = require('mongoose');
 var mongoStore = require('connect-mongodb');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
-var LocalStrategy = require('passport-local').Strategy
 
 var app = express();
 
@@ -24,42 +23,61 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(app.router);
 
+passport.use(new FacebookStrategy({
+        clientID: process.env.FACEBOOK_APP_ID,
+        clientSecret: process.env.FACEBOOK_APP_SECRET,
+        callbackURL: process.env.FACEBOOK_CALLBACK_URL
+    },
+    function(accessToken, refreshToken, profile, done) {
+        UserModel.findOne({ 'username': profile.username }, function (err, user) {
+            if (err) {
+                return done(err);
+            }
+
+            if (!user) {
+                // create new user
+                user = new UserModel({
+                    name: profile.displayName,
+                    email: profile.emails && profile.emails.length > 0 ? profile.emails[0].value : null,
+                    username: profile.username,
+                    facebook: profile._json
+                });
+            } else {
+                // refresh details
+                user.displayName = profile.displayName;
+                user.email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : null;
+                user.username = profile.username;
+                user.facebook = profile._json;
+            }
+
+            user.save(function (err) {
+                return done(err, user);
+            });
+        });
+    }
+));
+
+passport.serializeUser(function(user, done) {
+    done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+    UserModel.findOne({ _id: id }, function (err, user) {
+        done(err, user);
+    });
+});
+
 // Conditional config based on value of process.env.NODE_ENV
 app.configure('development', function(){
     app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-    passport.use(new LocalStrategy(
-        function(username, password, done) {
-            UserModel.findOne({ username: username }, function(err, user) {
-                if (err) { return done(err); }
-                if (!user) {
-                    return done(null, false, { message: 'Incorrect username.' });
-                }
-                return done(null, user);
-            });
-        }
-    ));
 });
 app.configure('production', function(){
     app.use(express.errorHandler());
-    passport.use(new FacebookStrategy({
-            clientID: process.env.FACEBOOK_APP_ID,
-            clientSecret: process.env.FACEBOOK_APP_SECRET,
-            callbackURL: process.env.FACEBOOK_CALLBACK_URL
-        },
-        function(accessToken, refreshToken, profile, done) {
-            UserModel.findOrCreate({ username: profile.username }, function(err, user) {
-                if (err) { return done(err); }
-                done(null, user);
-            });
-        }
-    ));
 });
-
-var authenticateStrategy = process.env.NODE_ENV === 'development' ? 'local' : 'facebook';
 
 var authorizeByRoles = function(roles) {
     return [
-        passport.authenticate(authenticateStrategy),
+        passport.authenticate('facebook'),
         function(req, res, next) {
             if (req.user && _.contains(roles, req.user.role))
                 next();
@@ -82,14 +100,14 @@ app.get('/auth/facebook/callback',
     passport.authenticate('facebook',
     { successRedirect: '/', failureRedirect: '/' }));
 
-app.post('/login',
-    passport.authenticate('local'),
-    function(req, res) {
-        return res.send(req.user._doc);
-    });
+/*function(req, res) {
+set user in session??? How to communicate back to client session??? Do I have to do a post?
+ return res.send(req.user._doc);
+ });*/
 
 //Log out the current user
 app.post('/logout', function(req, res) {
+    res.
     req.session.destroy();
     req.logout();
     res.redirect('/');

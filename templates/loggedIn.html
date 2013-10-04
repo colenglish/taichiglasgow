@@ -4,9 +4,7 @@
         <button type="submit" class="btn btn-sm btn-inverse">Sign out</button>
     </form>
 <% } else { %>
-    <form id="login_form" class="navbar-form navbar-right">
-        <input name="username" type="text" class="input-sm" placeholder="Username">
-        <input name="password" type="password" class="input-sm" placeholder="Password">
-        <button type="submit" class="btn btn-sm btn-inverse">Sign in</button>
-    </form>
+<form id="login_form" class="navbar-form navbar-right">
+    <button type="button" class="btn btn-sm"><a href="/auth/facebook">Login with Facebook</a></button>
+</form>
 <% } %>

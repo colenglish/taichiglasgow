@@ -1,5 +1,4 @@
 var mongoose = require('mongoose');
-var findOrCreate = require('mongoose-findorcreate');
 
 var Schema = mongoose.Schema;
 
@@ -23,10 +22,13 @@ exports.ClassModel = function(db) {
 // Create a schema for our users
 var UserSchema = new Schema({
     username: { type: String },
+    name: { type: String },
+    email: { type: String },
+    facebook_id: { type: String },
+    facebook: { },
+    createdAt: { type: Date, 'default': Date.now },
     role: { type: String, enum: ['user', 'admin'], default: "user" }
 });
-
-UserSchema.plugin(findOrCreate);
 
 // Ascending index on username, ensuring uniqueness
 UserSchema.index({username: 1}, {unique: true});

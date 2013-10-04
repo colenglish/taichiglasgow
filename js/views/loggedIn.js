@@ -15,26 +15,7 @@ define([
         },
 
         events: {
-            'submit #login_form': 'onLogin',
             'submit #logout_form': 'onLogout'
-        },
-
-        onLogin: function(e){
-            e.preventDefault();
-
-            var that = this;
-
-            var $form = $(e.srcElement),
-                username = $form.find( 'input[name="username"]' ).val(),
-                password = $form.find( 'input[name="password"]' ).val();
-
-            $.post(
-                "\\login",
-                { username: username, password: password },
-                function( data ) {
-                    that.model.set({ userName: data.username, userRole: data.role, loggedIn: true});
-                }
-            ).error(function() { alert("error"); })
         },
 
         onLogout: function(e){
