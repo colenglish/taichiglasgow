@@ -3,7 +3,7 @@ define([
   'Backbone'
 ], function(_, Backbone) {
   var ClassModel = Backbone.Model.extend({
-    url: 'http://localhost:5000/api/classes'
+    url: '/api/classes'
   });
   return ClassModel;
 

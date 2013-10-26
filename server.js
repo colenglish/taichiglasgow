@@ -77,14 +77,12 @@ app.configure('production', function(){
 
 var authorizeByRoles = function(roles) {
     return [
-        passport.authenticate('facebook'),
         function(req, res, next) {
-            if (req.user && _.contains(roles, req.user.role))
+            if (req.isAuthenticated() && req.user && _.contains(roles, req.user.role))
                 next();
             else
                 res.send(401, 'Unauthorized');
-        }
-    ];
+        }];
 };
 
 // Redirect the user to Facebook for authentication.  When complete,
@@ -97,17 +95,15 @@ app.get('/auth/facebook', passport.authenticate('facebook'));
 // access was granted, the user will be logged in.  Otherwise,
 // authentication has failed.
 app.get('/auth/facebook/callback',
-    passport.authenticate('facebook',
-    { successRedirect: '/', failureRedirect: '/' }));
-
-/*function(req, res) {
-set user in session??? How to communicate back to client session??? Do I have to do a post?
- return res.send(req.user._doc);
- });*/
+    passport.authenticate('facebook', { failureRedirect: '/' }),
+    function(req, res) {
+        // Successful authentication, redirect to logged in page (will set up client session).
+        // TODO: Something with the access token?
+        res.redirect('/#/logged-in');
+    });
 
 //Log out the current user
 app.post('/logout', function(req, res) {
-    res.
     req.session.destroy();
     req.logout();
     res.redirect('/');
@@ -143,21 +139,10 @@ app.get('/api/users', authorizeByRoles(['admin']), function (req, res){
     });
 });
 
-app.post('/api/users', authorizeByRoles(['admin']), function(req, res) {
-    var user = new UserModel({
-        username: req.body.username,
-        password: req.body.password
+app.get('/api/user', authorizeByRoles(['user', 'admin']),
+    function(req, res) {
+        return res.send(req.user._doc);
     });
-    user.save(function (err) {
-        if (!err){
-            req.session.user_id = user.__id;
-            req.session.user_role = user.role;
-            return res.send(user.__doc);
-        }else {
-            return res.send(err);
-        }
-    })
-});
 
 // Launch server
 var port = process.env.PORT; // Set in env vars via IDE config (debug), local .env (foreman), or heroku config (production)
