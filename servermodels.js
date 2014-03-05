@@ -3,20 +3,20 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 // Create a schema for our class info
-var ClassSchema = new Schema({
-    location: { type: String },
-    teacher: { type: String, default: "Charlie Gorrie" },
-    day: { type: String } ,
-    starttime: { type: String },
-    endtime: { type: String },
-    cost: { type: Number, default: 10 },
-    notes: String
+var MovementSchema = new Schema({
+    formName: { type: String },
+    formPosition: { type: Number },
+    name: { type: String },
+    description: { type: String, default: "Hard work." },
+    repetitions: { type: Number },
+    repetition_duration: { type: Number },
+    notes: { type: String }
 });
 
 // Use the schema to register a model, then make it available
-mongoose.model('Class', ClassSchema);
-exports.ClassModel = function(db) {
-    return db.model('Class');
+mongoose.model('Movement', MovementSchema);
+exports.MovementModel = function(db) {
+    return db.model('Movement');
 };
 
 // Create a schema for our users

@@ -4,31 +4,32 @@ define([
     'Underscore',
     'Backbone',
     'views/home',
-    'views/classes',
     'views/events',
-    'views/members'
-], function($, _, Backbone, homeView, classesView, eventsView, membersView){
+    'views/neigung'
+], function($, _, Backbone, homeView, eventsView, neiGungView){
     var AppRouter = Backbone.Router.extend({
         routes: {
             // Define some URL routes
-            'classes': 'showClasses',
             'events': 'showEvents',
-            'members': 'showMembers',
+            'neigung/:setname': 'showNeiGung',
             'logged-in': 'configureClientSession',
 
             // Default
             '*actions': 'defaultAction'
-        },
-        showClasses: function(){
-            classesView.render();
         },
 
         showEvents: function(){
             eventsView.render();
         },
 
-        showMembers: function(){
-            membersView.render();
+        showNeiGung: function(setname){
+            if (setname === "yang"){
+                neiGungView.render("yangneigung", "Yang Nei Gung");
+            }
+            else {
+                neiGungView.render("yinneigung", "Yin Nei Gung");
+            }
+
         },
 
         configureClientSession: function(){

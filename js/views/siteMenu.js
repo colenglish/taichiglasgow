@@ -19,7 +19,9 @@ define([
                 { label: "Events", url: "#/events" }
             ];
 
-            this.membermenuitems = _.union(this.standardmenuitems, [{ label: "Members", url: "#/members" }])
+            this.membermenuitems = _.union(this.standardmenuitems, [
+                { label: "Nei Gung", url: "#/neigung/yin" }
+            ])
         },
 
         render: function () {

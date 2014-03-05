@@ -11,7 +11,7 @@ var app = express();
 var db = mongoose.connect(process.env.MONGO_URI);
 
 var models = require('./servermodels.js');
-var ClassModel = models.ClassModel(db);
+var MovementModel = models.MovementModel(db);
 var UserModel = models.UserModel(db);
 
 // Config
@@ -109,20 +109,23 @@ app.post('/logout', function(req, res) {
     res.redirect('/');
 });
 
-app.get('/api/classes', function (req, res){
-    return ClassModel.find(function (err, classes) {
+app.get('/api/form/:name', authorizeByRoles(['user', 'admin']), function (req, res){
+    return MovementModel.find({ 'formName': req.params.name }, function (err, movements) {
         if (!err) {
-            return res.send(classes);
+            var sortedMovements = _.sortBy(movements, function(movement) {
+                return movement.position;
+            })
+            return res.send(sortedMovements);
         } else {
             return console.log(err);
         }
     });
 });
 
-app.get('/api/classes/:id', function (req, res){
-    return ClassModel.findById(req.params.id, function (err, classs) {
+app.get('/api/movement/:id', authorizeByRoles(['user', 'admin']), function (req, res){
+    return MovementModel.findById(req.params.id, function (err, movement) {
         if (!err) {
-            return res.send(classs);
+            return res.send(movement);
         } else {
             return console.log(err);
         }

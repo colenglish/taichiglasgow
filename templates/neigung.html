@@ -1,0 +1,18 @@
+<div class="panel-group" id="nei-gung">
+    <% var id = _.uniqueId();
+    _.each(exercises, function(exercise){ %>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#nei-gung" href="#<%= id %>">
+                    <%= exercise.get("name") %>
+                </a>
+            </h4>
+        </div>
+        <div id="<%= id %>" class="panel-collapse collapse">
+            <div class="panel-body"><%= exercise.get("description") %></div>
+        </div>
+    </div>
+    <% id = _.uniqueId();
+    }); %>
+</div>
